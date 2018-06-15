@@ -15,6 +15,7 @@ import boto3
 import hashlib
 import json
 import urllib2
+import os
 
 # Name of the service, as seen in the ip-groups.json file, to extract information for
 SERVICE = "CLOUDFRONT"
@@ -30,6 +31,7 @@ SECURITY_GROUP_TAG_FOR_REGION_HTTP = {
 SECURITY_GROUP_TAG_FOR_REGION_HTTPS = {
     'Name': 'cloudfront_r', 'AutoUpdate': 'true', 'Protocol': 'https'}
 
+SECURITY_GROUP_REGION = os.environ['SECURITY_GROUP_REGION']
 
 def lambda_handler(event, context):
     print("Received event: " + json.dumps(event, indent=2))
@@ -78,7 +80,7 @@ def get_ranges_for_service(ranges, service, subset):
 
 
 def update_security_groups(new_ranges):
-    client = boto3.client('ec2')
+    client = boto3.client('ec2', region_name=SECURITY_GROUP_REGION)
 
     global_http_group = get_security_groups_for_update(
         client, SECURITY_GROUP_TAG_FOR_GLOBAL_HTTP)

@@ -1,6 +1,10 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: 'AWS::Serverless-2016-10-31'
-Description: An Amazon SNS trigger that logs the message pushed to the SNS topic.
+Description: Auto update CloudFront security groups based on SNS message
+Parameters:
+  SecurityGroupRegion:
+    Type: String
+    Description: Region where your security groups are
 Resources:
   updatesecuritygroups:
     Type: 'AWS::Serverless::Function'
@@ -21,9 +25,11 @@ Resources:
                 - ec2:AuthorizeSecurityGroupIngress
                 - ec2:RevokeSecurityGroupIngress
               Resource: '*'
+      Environment:
+        Variables:
+          SECURITY_GROUP_REGION: !Ref SecurityGroupRegion
       Events:
         SNS:
           Type: SNS
           Properties:
             Topic: arn:aws:sns:us-east-1:806199016981:AmazonIpSpaceChanged
-
