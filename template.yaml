@@ -15,16 +15,6 @@ Resources:
       Description: Auto update CloudFront security groups based on SNS message.
       MemorySize: 128
       Timeout: 5
-      Policies:
-        - AWSLambdaExecute
-        - Version: '2012-10-17'
-          Statement:
-            - Effect: Allow
-              Action:
-                - ec2:DescribeSecurityGroups
-                - ec2:AuthorizeSecurityGroupIngress
-                - ec2:RevokeSecurityGroupIngress
-              Resource: '*'
       Environment:
         Variables:
           SECURITY_GROUP_REGION: !Ref SecurityGroupRegion

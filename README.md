@@ -1,19 +1,44 @@
 # Update Cloudfront Security Groups
 
-This is a lambda function borrowed from [aws-cloudfront-samples](https://github.com/aws-samples/aws-cloudfront-samples/tree/master/update_security_groups_lambda). Triggered by an AWS SNS notification that their IP blocks have been updated, this function will update your Security Groups based on some tags.
+Triggered by an AWS SNS notification that their IP blocks have been updated, this function will automatically update your Security Groups with specific tags.
 
 ## Deploy
 
-In order to create the SNS subscription this function needs to be deployed to us-east-1. However a region of us-west-2 is set in the function itself.
+In order to create the SNS subscription this function needs to be deployed to us-east-1.
 
-### Package
+### Serverless Application Repository
 
-`aws s3api create-bucket --bucket bucket-name --region us-east-1`
-`aws cloudformation package --template-file ./template.yaml --s3-bucket bucket-name --output-template-file packaged-template.yaml`
+The serverless application Repository only supports a subset of permissions. Currently it does not support the Security Group Permissions this function needs. Once the function is deployed you will need to update the Lambda execution role created with the following inline policy.
 
-### Deploy function
-
-`aws cloudformation deploy --template-file ./packaged-template.yaml --stack-name auto-update-cloudfront-security-groups --capabilities CAPABILITY_IAM --region us-east-1 --parameter-overrides SecurityGroupRegion=us-west-2`
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ec2:AuthorizeSecurityGroupIngress",
+                "ec2:RevokeSecurityGroupIngress"
+            ],
+            "Resource": "arn:aws:ec2:[region]:[account-id]:security-group/*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": "ec2:DescribeSecurityGroups",
+            "Resource": "*"
+        },
+        {
+            "Action": [
+                "logs:CreateLogGroup",
+                 "logs:CreateLogStream",
+                 "logs:PutLogEvents"
+            ],
+            "Effect": "Allow",
+            "Resource": "arn:aws:logs:*:*:*"
+        }
+    ]
+}
+```
 
 ## Usage
 
